@@ -157,5 +157,3 @@ Data Analyst | Aspiring Data Scientist
 
 ---
 
-
-Just tell me 👍
