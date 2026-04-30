@@ -1,0 +1,194 @@
+select * from `workspace`.`default`.`car_sales_` limit 100;
+--- Set all data/strings in the dataset to Lowercase so that it consolidates data  --- 
+
+UPDATE car_sales_
+SET
+    make         = LOWER(make),
+    model        = LOWER(model),
+    trim         = LOWER(trim),
+    body         = LOWER(body),
+    transmission = LOWER(transmission),
+    vin          = LOWER(vin),
+    state        = LOWER(state),
+    color        = LOWER(color),
+    interior     = LOWER(interior),
+    seller       = LOWER(seller);
+
+--- Making all numbers rounded off to two decimals in this data set ---
+
+UPDATE car_sales_
+SET
+    year         = ROUND(year, 2),
+    condition    = ROUND(condition, 2),
+    odometer     = ROUND(odometer, 2),
+    mmr          = ROUND(mmr, 2),
+    sellingprice = ROUND(sellingprice, 2);
+
+--- MIN and Max Year : 1982 and 2015 
+
+SELECT MIN(year) AS start_year 
+FROM  workspace.default.car_sales_ ;
+
+
+SELECT MAX(year) AS end_year 
+FROM  workspace.default.car_sales_ ;
+
+-- ==========================================================
+-- OBJECTIVE 1:
+-- Which car makes and models generate the most revenue
+-- ==========================================================
+
+--- Total Revenue and units sold --- 
+SELECT 
+    SUM(sellingprice) AS total_revenue,
+    COUNT(*) AS units_sold
+FROM car_sales_;
+
+--- Revenue by Make ---
+SELECT 
+    make,
+    SUM(sellingprice) AS total_revenue,
+    COUNT(*) AS units_sold
+FROM car_sales_
+GROUP BY make
+ORDER BY total_revenue DESC;
+
+--- Revenue by Model ---
+SELECT 
+    make,
+    model,
+    SUM(sellingprice) AS total_revenue,
+    COUNT(*) AS units_sold
+FROM car_sales_
+GROUP BY make,model
+ORDER BY total_revenue DESC;
+
+--- Top 10 Sales by Revenue ---
+
+SELECT 
+    make,
+    model,
+    SUM(sellingprice) AS total_revenue
+FROM car_sales_
+GROUP BY make, model
+ORDER BY total_revenue DESC
+LIMIT 10;
+
+-- ==========================================================
+-- OBJECTIVE 2:
+-- Relationship between mileage, year and price 
+-- ==========================================================
+--- Relationship between mileage, year and price ---
+
+SELECT
+    year,
+    AVG(sellingprice) AS avg_price,
+    AVG(odometer) AS avg_mileage
+FROM car_sales_
+GROUP BY year
+ORDER BY year;
+
+--- Scatter Plot data set ---
+SELECT
+    year,
+    sellingprice,
+    odometer,
+    make,
+    model
+FROM car_sales_;
+
+-- ==========================================================
+-- OBJECTIVE 3:
+-- Which regions or locations have the highest sales volumes
+-- ==========================================================
+
+--- Sales by state ---
+SELECT
+    state,
+    COUNT(*) AS sales_per_state,
+    SUM(sellingprice) AS revenue
+FROM car_sales_
+GROUP BY state
+ORDER BY sales_per_state DESC;
+
+-- ==========================================================
+-- OBJECTIVE 4:
+-- Emerging customer purchasing preferences
+-- ==========================================================
+
+-- Most Popular Body Type --
+SELECT
+    body,
+    COUNT(*) AS purchases
+FROM car_sales_
+GROUP BY body
+ORDER BY purchases DESC;
+
+-- Most Popular Transmission ---
+SELECT
+    IFNULL(transmission, 'Unknown') AS transmission,
+    COUNT(*) AS purchases
+FROM car_sales_
+GROUP BY IFNULL(transmission, 'Unknown')
+ORDER BY purchases DESC;
+
+-- Popular Colors
+SELECT
+    color,
+    COUNT(*) AS purchases
+FROM car_sales_
+GROUP BY color
+ORDER BY purchases DESC;
+
+
+
+-- Popular Interiors
+SELECT
+    interior,
+    COUNT(*) AS purchases
+FROM car_sales_
+GROUP BY interior
+ORDER BY purchases DESC;
+
+
+-- ==========================================================
+-- OBJECTIVE 5:
+-- Profitability / Efficiency Recommendations to dealership 
+-- ==========================================================
+
+-- Cars Sold Above Market Value
+SELECT
+    make,
+    model,
+    AVG(sellingprice - mmr) AS avg_profit
+FROM car_sales_
+GROUP BY make, model
+ORDER BY avg_profit DESC;
+
+-- Cars Sold Below Market Value
+SELECT
+    make,
+    model,
+    AVG(sellingprice - mmr) AS avg_loss
+FROM car_sales_
+GROUP BY make, model
+ORDER BY avg_loss ASC;
+
+-- Best Sellers by Volume
+SELECT
+    make,
+    model,
+    COUNT(*) AS units_sold
+FROM car_sales_
+GROUP BY make, model
+ORDER BY units_sold DESC;
+
+
+-- Monthly Sales Trend
+SELECT
+    MONTH(saledate) AS sales_month,
+    COUNT(*) AS cars_sold,
+    SUM(sellingprice) AS revenue
+FROM car_sales_
+GROUP BY MONTH(try_cast(saledate AS DATE))
+ORDER BY sales_month;
