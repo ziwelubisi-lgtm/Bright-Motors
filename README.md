@@ -1,6 +1,4 @@
-# Here’s a clean, professional, GitHub-ready `README.md` you can paste directly into your repo:
 
----
 
 # 🚗 Bright Motors Car Sales Data Analysis
 
